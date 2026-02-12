@@ -52,17 +52,23 @@
         "prepublishOnly": "npm run typecheck && npm run build"
     },
     "peerDependencies": {
+        "maplibre-gl": "^5.18.0",
         "vue": "^3.5.0"
+    },
+    "peerDependenciesMeta": {
+        "maplibre-gl": {
+            "optional": true
+        }
     },
     "dependencies": {
         "ionicons": "8.0.13",
-        "maplibre-gl": "5.18.0",
         "pmtiles": "4.4.0"
     },
     "devDependencies": {
         "@tailwindcss/vite": "4.1.18",
         "@types/node": "25.2.3",
         "@vitejs/plugin-vue": "6.0.4",
+        "maplibre-gl": "5.18.0",
         "sass": "1.97.3",
         "tailwindcss": "4.1.18",
         "typescript": "5.9.3",

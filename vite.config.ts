@@ -19,7 +19,7 @@ export default defineConfig({
         },
         cssCodeSplit: false,
         rollupOptions: {
-            external: ["vue"],
+            external: ["vue", "maplibre-gl"],
             output: {
                 globals: { vue: "Vue" },
             },

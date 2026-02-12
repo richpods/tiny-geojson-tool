@@ -11,10 +11,11 @@ Vue 3 component library for editing and viewing GeoJSON on a [MapLibre GL JS](ht
 ## Install
 
 ```sh
-npm install @richpods/tiny-geojson-tool
+npm install @richpods/tiny-geojson-tool maplibre-gl
 ```
 
 Vue 3.5+ is a peer dependency.
+`maplibre-gl` is an optional peer dependency and is required when using `GeoJsonEditor` or `GeoJsonViewer`.
 
 ## Usage
 
@@ -62,10 +63,11 @@ Both components accept:
 
 ## Drawing Tools
 
-The editor toolbar provides five modes:
+The editor toolbar provides six modes:
 
 - **Select** — Click features to select and edit properties
-- **Draw Marker** — Click to place point markers
+- **Draw Point** — Click to place circle points
+- **Draw Marker** — Click to place icon markers
 - **Draw Line** — Click to add vertices, click near the last vertex to finish
 - **Draw Polygon** — Click to add vertices, click near the first vertex to close
 - **Eraser** — Click features to delete them
@@ -78,9 +80,10 @@ Features support [simplestyle-spec 1.1.0](https://github.com/mapbox/simplestyle-
 
 - **Polygons** — `fill`, `fill-opacity`, `stroke`, `stroke-opacity`, `stroke-width`
 - **Lines** — `stroke`, `stroke-opacity`, `stroke-width`
-- **Points** — `marker-color`, `marker-size` (small/medium/large), `marker-symbol`
+- **Points** — `fill`, `fill-opacity`, `stroke`, `stroke-opacity`, `stroke-width`
+- **Markers** — `marker-color`, `marker-size` (small/medium/large), `marker-symbol`
 
-Extensions: `title`, `description`, `marker-label`, `marker-label-position`.
+All features support `title` and `description`. Extensions beyond the spec: `circle-radius`, `marker-label`, `marker-label-position`.
 
 ## Localization
 
