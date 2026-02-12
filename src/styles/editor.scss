@@ -1,0 +1,16 @@
+@use "toolbar";
+@use "property-editor";
+@use "popup";
+
+.tge-editor,
+.tge-viewer {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    font-family: var(--tge-font-family);
+}
+
+.tge-map {
+    width: 100%;
+    height: 100%;
+}

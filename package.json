@@ -1,0 +1,76 @@
+{
+    "name": "@richpods/tiny-geojson-tool",
+    "version": "0.0.1",
+    "description": "RichPods' Vue 3 GeoJSON editor and viewer for MapLibre GL JS with drawing tools (points, lines, polygons), simplestyle-spec property editing, hover popups, PMTiles basemap support, and typed v-model bindings for custom mapping workflows.",
+    "keywords": [
+        "vue",
+        "vue3",
+        "geojson",
+        "gis",
+        "simplestyle-spec",
+        "richpods"
+    ],
+    "license": "BlueOak-1.0.0",
+    "author": "Philipp Naderer-Puiu",
+    "homepage": "https://github.com/richpods/tiny-geojson-tool#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/richpods/tiny-geojson-tool.git"
+    },
+    "bugs": {
+        "url": "https://github.com/richpods/tiny-geojson-tool/issues"
+    },
+    "type": "module",
+    "publishConfig": {
+        "access": "public"
+    },
+    "files": [
+        "dist",
+        "index.d.ts"
+    ],
+    "main": "./dist/tiny-geojson-tool.js",
+    "module": "./dist/tiny-geojson-tool.js",
+    "types": "./index.d.ts",
+    "exports": {
+        ".": {
+            "import": "./dist/tiny-geojson-tool.js",
+            "types": "./index.d.ts"
+        },
+        "./styles": "./dist/styles/editor.css"
+    },
+    "engines": {
+        "node": "^22.0.0 || ^24.0.0"
+    },
+    "sideEffects": [
+        "**/*.css",
+        "**/*.scss"
+    ],
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build && npm run build:types",
+        "build:demo": "vite build --config vite.demo.config.ts",
+        "build:types": "vue-tsc -p tsconfig.build.json",
+        "preview:demo": "vite preview --config vite.demo.config.ts",
+        "typecheck": "vue-tsc --noEmit",
+        "prepublishOnly": "npm run typecheck && npm run build"
+    },
+    "peerDependencies": {
+        "vue": "^3.5.0"
+    },
+    "dependencies": {
+        "ionicons": "8.0.13",
+        "maplibre-gl": "5.18.0",
+        "pmtiles": "4.4.0"
+    },
+    "devDependencies": {
+        "@tailwindcss/vite": "4.1.18",
+        "@types/node": "25.2.3",
+        "@vitejs/plugin-vue": "6.0.4",
+        "sass": "1.97.3",
+        "tailwindcss": "4.1.18",
+        "typescript": "5.9.3",
+        "vite": "7.3.1",
+        "vue": "3.5.28",
+        "vue-tsc": "3.2.4"
+    }
+}
