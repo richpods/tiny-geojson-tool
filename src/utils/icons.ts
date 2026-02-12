@@ -62,7 +62,7 @@ import {
 
 /** Built-in SVG icons (not from Ionicons) */
 const BUILTIN_SVGS: Record<string, string> = {
-    "marker-pin": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 27 41"><path d="M13.5 0C6.044 0 0 6.044 0 13.5 0 24.818 13.5 41 13.5 41S27 24.818 27 13.5C27 6.044 20.956 0 13.5 0z" fill="#000"/><circle cx="13.5" cy="13.5" r="5.5" fill="#fff"/></svg>`,
+    "marker-pin": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 27 41"><path d="M13.5 0C6.044 0 0 6.044 0 13.5 0 24.818 13.5 41 13.5 41S27 24.818 27 13.5C27 6.044 20.956 0 13.5 0z" fill="#000"/></svg>`,
 };
 
 const IONICON_URLS: Readonly<Record<string, string>> = {

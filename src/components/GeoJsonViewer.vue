@@ -1,12 +1,22 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from "vue";
-import maplibregl, { type Map as MaplibreMap, type MapMouseEvent, Popup } from "maplibre-gl";
+import { computed, ref, onMounted, onUnmounted, watch } from "vue";
+import maplibregl, {
+    type Map as MaplibreMap,
+    type MapMouseEvent,
+    Popup,
+} from "maplibre-gl";
 import { Protocol } from "pmtiles";
 import { useMapStyle } from "../composables/useMapStyle";
-import type { EditorFeatureCollection, Position } from "../types";
-import { SOURCE_ID, LAYER_IDS, DEFAULT_CENTER, DEFAULT_ZOOM, DEFAULT_PMTILES_URL } from "../constants";
-import { getEditorLayers } from "../utils/layers";
+import type { EditorFeatureCollection, EditorFeature, Position } from "../types";
+import { SOURCE_ID, DEFAULT_CENTER, DEFAULT_ZOOM, DEFAULT_PMTILES_URL } from "../constants";
+import {
+    getFeatureLayers,
+    getQueryableLayerIds,
+    reconcileFeatureLayers,
+    type FeatureSummary,
+} from "../utils/layers";
 import { loadIconsForFeatures } from "../utils/icons";
+import { fitMapToFeatures, shouldAutoFitOnLoad } from "../utils/mapView";
 
 const props = withDefaults(
     defineProps<{
@@ -18,8 +28,6 @@ const props = withDefaults(
     {
         modelValue: () => ({ type: "FeatureCollection" as const, features: [] }),
         pmtilesUrl: DEFAULT_PMTILES_URL,
-        center: () => DEFAULT_CENTER,
-        zoom: DEFAULT_ZOOM,
     }
 );
 
@@ -28,6 +36,17 @@ let map: MaplibreMap | null = null;
 let popup: Popup | null = null;
 let protocolRegistered = false;
 let mapLoaded = false;
+
+/** Tracks which per-feature layers currently exist on the map. */
+let prevFeatureSummaries: FeatureSummary[] = [];
+/** Cached queryable layer IDs (excludes labels) for queryRenderedFeatures. */
+let queryableLayerIds: string[] = [];
+/** Auto-fit only when consumer did not pass explicit map view props. */
+const shouldAutoFit = computed(() => shouldAutoFitOnLoad(props.center, props.zoom));
+
+function toSummaries(features: EditorFeature[]): FeatureSummary[] {
+    return features.map((f) => ({ id: f.id, geomType: f.geometry.type }));
+}
 
 function updateSource() {
     if (!map) return;
@@ -41,7 +60,11 @@ watch(
     () => props.modelValue,
     async () => {
         updateSource();
-        if (map) {
+        if (map && mapLoaded) {
+            const nextSummaries = toSummaries(props.modelValue.features);
+            reconcileFeatureLayers(map, prevFeatureSummaries, nextSummaries);
+            prevFeatureSummaries = nextSummaries;
+            queryableLayerIds = getQueryableLayerIds(nextSummaries);
             await loadIconsForFeatures(map, props.modelValue.features as any);
         }
     },
@@ -51,8 +74,7 @@ watch(
 function onMouseMove(e: MapMouseEvent) {
     if (!mapLoaded || !map) return;
 
-    const editorLayerIds = [LAYER_IDS.fill, LAYER_IDS.line, LAYER_IDS.points, LAYER_IDS.symbols];
-    const features = map.queryRenderedFeatures(e.point, { layers: editorLayerIds });
+    const features = map.queryRenderedFeatures(e.point, { layers: queryableLayerIds });
     const feat = features?.[0];
 
     if (feat) {
@@ -107,6 +129,13 @@ onMounted(() => {
         attributionControl: false,
     });
 
+    map.addControl(
+        new maplibregl.AttributionControl({
+            compact: true,
+            customAttribution: '<a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors',
+        }),
+        "bottom-right"
+    );
     map.addControl(new maplibregl.NavigationControl(), "bottom-right");
     map.addControl(
         new maplibregl.GeolocateControl({
@@ -126,13 +155,27 @@ onMounted(() => {
             promoteId: "id",
         });
 
-        const layers = getEditorLayers(null);
-        for (const layer of layers) {
-            map.addLayer(layer);
+        // Add per-feature layers (reverse order so first feature renders on top)
+        for (let i = props.modelValue.features.length - 1; i >= 0; i--) {
+            const feature = props.modelValue.features[i]!;
+            for (const layer of getFeatureLayers(feature.id, feature.geometry.type)) {
+                map.addLayer(layer);
+            }
         }
+
+        // Track initial state
+        prevFeatureSummaries = toSummaries(props.modelValue.features);
+        queryableLayerIds = getQueryableLayerIds(prevFeatureSummaries);
 
         await loadIconsForFeatures(map, props.modelValue.features as any);
 
+        if (shouldAutoFit.value) {
+            map.once("idle", () => {
+                if (map) {
+                    fitMapToFeatures(map, props.modelValue.features);
+                }
+            });
+        }
         mapLoaded = true;
     });
 

@@ -1,9 +1,13 @@
 .tge-popup-container {
+    max-width: 280px;
+
     .maplibregl-popup-content {
         padding: 10px 14px;
         border-radius: var(--tge-border-radius);
         box-shadow: var(--tge-shadow);
         font-family: var(--tge-font-family);
+        word-wrap: break-word;
+        overflow-wrap: break-word;
     }
 }
 

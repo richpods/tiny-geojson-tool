@@ -20,6 +20,22 @@ export interface StrokeStyleProperties {
     "stroke-width"?: number;
 }
 
+/** Style properties for circle points (extending simplestyle to Points) */
+export interface PointStyleProperties {
+    "fill"?: string;
+    "fill-opacity"?: number;
+    "stroke"?: string;
+    "stroke-opacity"?: number;
+    "stroke-width"?: number;
+    "circle-radius"?: number;
+}
+
+/** Label properties shared by points and markers */
+export interface LabelProperties {
+    "marker-label"?: string;
+    "marker-label-position"?: "top" | "left" | "right" | "bottom";
+}
+
 /** Style properties for markers/points */
 export interface MarkerStyleProperties {
     "marker-color"?: string;
@@ -63,15 +79,31 @@ export interface EditorPointFeature {
         type: "Point";
         coordinates: PointCoordinates;
     };
+    properties: BaseProperties & PointStyleProperties & LabelProperties;
+}
+
+export interface EditorMarkerFeature {
+    type: "Feature";
+    id: string;
+    geometry: {
+        type: "Point";
+        coordinates: PointCoordinates;
+    };
     properties: BaseProperties & MarkerStyleProperties;
 }
 
-export type EditorFeature = EditorPolygonFeature | EditorLineStringFeature | EditorPointFeature;
+export type EditorFeature =
+    | EditorPolygonFeature
+    | EditorLineStringFeature
+    | EditorPointFeature
+    | EditorMarkerFeature;
 
 export type EditorProperties = BaseProperties &
     FillStyleProperties &
     StrokeStyleProperties &
-    MarkerStyleProperties;
+    MarkerStyleProperties &
+    PointStyleProperties &
+    LabelProperties;
 
 export interface EditorFeatureCollection {
     type: "FeatureCollection";
@@ -79,7 +111,7 @@ export interface EditorFeatureCollection {
 }
 
 /** Tool modes */
-export type ToolMode = "select" | "draw-polygon" | "draw-line" | "draw-marker" | "eraser";
+export type ToolMode = "select" | "draw-point" | "draw-polygon" | "draw-line" | "draw-marker" | "eraser";
 
 /** Editor props */
 export interface EditorProps {

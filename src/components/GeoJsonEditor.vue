@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import type {
     EditorFeatureCollection,
     EditorFeature,
@@ -9,10 +9,11 @@ import type {
 } from "../types";
 import type { EditorLocale } from "../l10n";
 import { DEFAULT_LOCALE } from "../l10n";
-import { DEFAULT_PMTILES_URL, DEFAULT_CENTER, DEFAULT_ZOOM, DEFAULT_POINT_RADIUS } from "../constants";
+import { DEFAULT_PMTILES_URL, DEFAULT_POINT_RADIUS } from "../constants";
 import EditorMap from "./EditorMap.vue";
 import EditorToolbar from "./EditorToolbar.vue";
-import PropertyEditor from "./PropertyEditor.vue";
+import LayerPanel from "./LayerPanel.vue";
+import { COMMON_ICONS, getIconUrl } from "../utils/icons";
 
 const props = withDefaults(
     defineProps<{
@@ -25,8 +26,6 @@ const props = withDefaults(
     {
         pmtilesUrl: DEFAULT_PMTILES_URL,
         pointRadius: DEFAULT_POINT_RADIUS,
-        center: () => DEFAULT_CENTER,
-        zoom: DEFAULT_ZOOM,
         l10n: () => ({}),
     }
 );
@@ -39,10 +38,17 @@ const model = defineModel<EditorFeatureCollection>({
 
 const activeTool = ref<ToolMode>("select");
 const selectedFeatureId = ref<string | null>(null);
+const iconUrls = ref<Map<string, string>>(new Map());
 
-const selectedFeature = computed<EditorFeature | null>(() => {
-    if (!selectedFeatureId.value) return null;
-    return model.value.features.find((f) => f.id === selectedFeatureId.value) ?? null;
+onMounted(async () => {
+    const entries = await Promise.all(
+        COMMON_ICONS.map(async (name) => [name, await getIconUrl(name)] as const)
+    );
+    const map = new Map<string, string>();
+    for (const [name, url] of entries) {
+        if (url) map.set(name, url);
+    }
+    iconUrls.value = map;
 });
 
 function onFeatureClick(feature: EditorFeature | null) {
@@ -79,6 +85,23 @@ function onToolDone(featureId: string) {
     activeTool.value = "select";
     selectedFeatureId.value = featureId;
 }
+
+function onFeatureSelect(id: string) {
+    selectedFeatureId.value = id;
+}
+
+function onFeatureReorder(featureId: string, newIndex: number) {
+    const features = [...model.value.features];
+    const oldIndex = features.findIndex((f) => f.id === featureId);
+    if (oldIndex === -1) return;
+
+    const [item] = features.splice(oldIndex, 1);
+    // Adjust insertion index since we removed an item before the target
+    const insertAt = oldIndex < newIndex ? newIndex - 1 : newIndex;
+    features.splice(insertAt, 0, item!);
+
+    model.value = { ...model.value, features };
+}
 </script>
 
 <template>
@@ -95,10 +118,14 @@ function onToolDone(featureId: string) {
             @featureClick="onFeatureClick"
             @featureDelete="onFeatureDelete"
             @toolDone="onToolDone" />
-        <PropertyEditor
-            :feature="selectedFeature"
+        <LayerPanel
+            :features="model.features"
+            :selectedFeatureId="selectedFeatureId"
             :l10n="locale"
+            :iconUrls="iconUrls"
             @update="onPropertyUpdate"
-            @close="selectedFeatureId = null" />
+            @select="onFeatureSelect"
+            @delete="onFeatureDelete"
+            @reorder="onFeatureReorder" />
     </div>
 </template>

@@ -17,6 +17,7 @@
         "noUncheckedIndexedAccess": true,
         "declaration": true,
         "declarationDir": "./dist",
+        "types": ["vite/client"],
         "paths": {
             "@/*": ["./src/*"]
         }

@@ -1,6 +1,10 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch, type Ref } from "vue";
-import maplibregl, { type Map as MaplibreMap, type MapMouseEvent, Popup } from "maplibre-gl";
+import { computed, ref, onMounted, onUnmounted, watch, type Ref } from "vue";
+import maplibregl, {
+    type Map as MaplibreMap,
+    type MapMouseEvent,
+    Popup,
+} from "maplibre-gl";
 import { Protocol } from "pmtiles";
 import { useMapStyle } from "../composables/useMapStyle";
 import type {
@@ -9,9 +13,17 @@ import type {
     Position,
     ToolMode,
 } from "../types";
-import { SOURCE_ID, TEMP_SOURCE_ID, TEMP_LINE_SOURCE_ID, TEMP_VERTICES_SOURCE_ID, LAYER_IDS, DEFAULT_CENTER, DEFAULT_ZOOM, DEFAULT_POINT_RADIUS } from "../constants";
-import { getEditorLayers, getDrawingLayers } from "../utils/layers";
+import { SOURCE_ID, TEMP_SOURCE_ID, TEMP_LINE_SOURCE_ID, TEMP_VERTICES_SOURCE_ID, DEFAULT_CENTER, DEFAULT_ZOOM, DEFAULT_POINT_RADIUS } from "../constants";
+import {
+    getFeatureLayers,
+    getVerticesLayer,
+    getDrawingLayers,
+    getQueryableLayerIds,
+    reconcileFeatureLayers,
+    type FeatureSummary,
+} from "../utils/layers";
 import { loadIconsForFeatures } from "../utils/icons";
+import { fitMapToFeatures, shouldAutoFitOnLoad } from "../utils/mapView";
 import { useDrawing } from "../composables/useDrawing";
 import { useGeoJson } from "../composables/useGeoJson";
 
@@ -37,6 +49,13 @@ let popup: Popup | null = null;
 let protocolRegistered = false;
 let mapLoaded = false;
 
+/** Tracks which per-feature layers currently exist on the map. */
+let prevFeatureSummaries: FeatureSummary[] = [];
+/** Cached queryable layer IDs (excludes labels) for queryRenderedFeatures. */
+let queryableLayerIds: string[] = [];
+/** Auto-fit only when consumer did not pass explicit map view props. */
+const shouldAutoFit = computed(() => shouldAutoFitOnLoad(props.center, props.zoom));
+
 const modelRef = ref(props.modelValue) as Ref<EditorFeatureCollection>;
 watch(
     () => props.modelValue,
@@ -60,10 +79,15 @@ watch(
     }
 );
 
+function toSummaries(features: EditorFeature[]): FeatureSummary[] {
+    return features.map((f) => ({ id: f.id, geomType: f.geometry.type }));
+}
+
 function updateCursor() {
     if (!map) return;
     const canvas = map.getCanvas();
     switch (props.activeTool) {
+        case "draw-point":
         case "draw-marker":
         case "draw-line":
         case "draw-polygon":
@@ -110,7 +134,11 @@ watch(
     () => props.modelValue,
     async () => {
         updateSources();
-        if (map) {
+        if (map && mapLoaded) {
+            const nextSummaries = toSummaries(props.modelValue.features);
+            reconcileFeatureLayers(map, prevFeatureSummaries, nextSummaries, "drawing-temp-fill");
+            prevFeatureSummaries = nextSummaries;
+            queryableLayerIds = getQueryableLayerIds(nextSummaries);
             await loadIconsForFeatures(map, props.modelValue.features as any);
         }
     },
@@ -129,9 +157,20 @@ function onMapClick(e: MapMouseEvent) {
     if (!mapLoaded) return;
     const tool = props.activeTool;
 
-    if (tool === "draw-marker") {
+    if (tool === "draw-point") {
         const coord: Position = [e.lngLat.lng, e.lngLat.lat];
         const feature = geoJson.createPoint(coord);
+        emit("update:modelValue", {
+            ...props.modelValue,
+            features: [...props.modelValue.features, feature],
+        });
+        emit("toolDone", feature.id);
+        return;
+    }
+
+    if (tool === "draw-marker") {
+        const coord: Position = [e.lngLat.lng, e.lngLat.lat];
+        const feature = geoJson.createMarker(coord);
         emit("update:modelValue", {
             ...props.modelValue,
             features: [...props.modelValue.features, feature],
@@ -183,13 +222,7 @@ function onMapClick(e: MapMouseEvent) {
     }
 
     if (tool === "eraser") {
-        const editorLayerIds = [
-            LAYER_IDS.fill,
-            LAYER_IDS.line,
-            LAYER_IDS.points,
-            LAYER_IDS.symbols,
-        ];
-        const features = map?.queryRenderedFeatures(e.point, { layers: editorLayerIds });
+        const features = map?.queryRenderedFeatures(e.point, { layers: queryableLayerIds });
         const hit = features?.[0];
         if (hit) {
             const id = hit.id as string;
@@ -201,13 +234,7 @@ function onMapClick(e: MapMouseEvent) {
     }
 
     if (tool === "select") {
-        const editorLayerIds = [
-            LAYER_IDS.fill,
-            LAYER_IDS.line,
-            LAYER_IDS.points,
-            LAYER_IDS.symbols,
-        ];
-        const features = map?.queryRenderedFeatures(e.point, { layers: editorLayerIds });
+        const features = map?.queryRenderedFeatures(e.point, { layers: queryableLayerIds });
         const hit = features?.[0];
         if (hit) {
             const id = hit.id as string;
@@ -233,13 +260,7 @@ function onMapMouseMove(e: MapMouseEvent) {
 
     // Popup on hover for select mode
     if (props.activeTool === "select" && !drawing.isDrawing.value) {
-        const editorLayerIds = [
-            LAYER_IDS.fill,
-            LAYER_IDS.line,
-            LAYER_IDS.points,
-            LAYER_IDS.symbols,
-        ];
-        const features = map?.queryRenderedFeatures(e.point, { layers: editorLayerIds });
+        const features = map?.queryRenderedFeatures(e.point, { layers: queryableLayerIds });
         const feat = features?.[0];
         if (feat) {
             const title = feat.properties?.title as string | undefined;
@@ -308,14 +329,21 @@ onMounted(() => {
         attributionControl: false,
     });
 
-    map.addControl(new maplibregl.NavigationControl(), "bottom-right");
+    map.addControl(
+        new maplibregl.AttributionControl({
+            compact: true,
+            customAttribution: 'OpenStreetMap contributors',
+        }),
+        "bottom-left"
+    );
+    map.addControl(new maplibregl.NavigationControl(), "bottom-left");
     map.addControl(
         new maplibregl.GeolocateControl({
             positionOptions: { enableHighAccuracy: false },
             trackUserLocation: false,
             fitBoundsOptions: { maxZoom: 13 },
         }),
-        "bottom-right"
+        "bottom-left"
     );
 
     map.on("load", async () => {
@@ -342,10 +370,12 @@ onMounted(() => {
             data: { type: "FeatureCollection", features: [] },
         });
 
-        // Add editor layers
-        const layers = getEditorLayers(null);
-        for (const layer of layers) {
-            map.addLayer(layer);
+        // Add per-feature layers (reverse order so first feature renders on top)
+        for (let i = props.modelValue.features.length - 1; i >= 0; i--) {
+            const feature = props.modelValue.features[i]!;
+            for (const layer of getFeatureLayers(feature.id, feature.geometry.type)) {
+                map.addLayer(layer);
+            }
         }
 
         // Add drawing preview layers
@@ -354,9 +384,23 @@ onMounted(() => {
             map.addLayer(layer);
         }
 
+        // Add vertices layer on top
+        map.addLayer(getVerticesLayer(null));
+
+        // Track initial state
+        prevFeatureSummaries = toSummaries(props.modelValue.features);
+        queryableLayerIds = getQueryableLayerIds(prevFeatureSummaries);
+
         // Load any icons from initial data
         await loadIconsForFeatures(map, props.modelValue.features as any);
 
+        if (shouldAutoFit.value) {
+            map.once("idle", () => {
+                if (map) {
+                    fitMapToFeatures(map, props.modelValue.features);
+                }
+            });
+        }
         mapLoaded = true;
         updateCursor();
     });

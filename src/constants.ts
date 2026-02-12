@@ -2,6 +2,7 @@ import type { ToolMode, Position } from "./types";
 
 export const TOOL_MODES: readonly ToolMode[] = [
     "select",
+    "draw-point",
     "draw-marker",
     "draw-line",
     "draw-polygon",
@@ -24,6 +25,7 @@ export const DEFAULTS = {
     strokeWidth: 2,
     markerColor: "#7e7e7e",
     markerSize: "medium",
+    circleRadius: 8,
 } as const;
 
 /** Numeric scale factors for marker-size enum */

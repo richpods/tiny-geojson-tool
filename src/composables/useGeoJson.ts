@@ -66,6 +66,16 @@ export function useGeoJson(model: Ref<EditorFeatureCollection>) {
         };
     }
 
+    function createMarker(coordinates: Position): EditorFeature {
+        const id = generateFeatureId();
+        return {
+            type: "Feature",
+            id,
+            geometry: { type: "Point", coordinates },
+            properties: { id, "marker-symbol": "location" },
+        };
+    }
+
     function getFeature(id: string): EditorFeature | undefined {
         return model.value.features.find((f) => f.id === id);
     }
@@ -79,6 +89,7 @@ export function useGeoJson(model: Ref<EditorFeatureCollection>) {
         createPolygon,
         createLineString,
         createPoint,
+        createMarker,
         getFeature,
     };
 }

@@ -128,6 +128,18 @@ npm run preview:demo # Preview built demo locally
 npm run typecheck    # Run type checking
 ```
 
+## Acknowledgements
+
+This project is built with the following open-source libraries:
+
+- **[Vue](https://vuejs.org/)** — JavaScript framework
+- **[MapLibre GL JS](https://maplibre.org/)** — Open-source map rendering library 
+- **[PMTiles](https://github.com/protomaps/PMTiles)** — Cloud-optimized tile archive format
+- **[Ionicons](https://ionic.io/ionicons)** — Open-source icon set
+- **[Shortbread](https://shortbread-tiles.org/)** — Vector tile schema for OpenStreetMap data
+
+Map data: [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors.
+
 ## License
 
 [Blue Oak Model License 1.0.0](https://blueoakcouncil.org/license/1.0.0)

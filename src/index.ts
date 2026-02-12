@@ -1,3 +1,4 @@
+import "maplibre-gl/dist/maplibre-gl.css";
 import "./styles/theme-standard.scss";
 import "./styles/editor.scss";
 
@@ -11,7 +12,15 @@ export { useDrawing } from "./composables/useDrawing";
 export { useMapStyle } from "./composables/useMapStyle";
 
 // Utilities for standalone map integration
-export { getEditorLayers, getDrawingLayers } from "./utils/layers";
+export {
+    getFeatureLayers,
+    getFeatureLayerIds,
+    getQueryableLayerIds,
+    getVerticesLayer,
+    reconcileFeatureLayers,
+    getDrawingLayers,
+} from "./utils/layers";
+export type { GeomType, FeatureSummary } from "./utils/layers";
 export { loadIcon, loadIconsForFeatures, getIconUrl, COMMON_ICONS } from "./utils/icons";
 
 // Localization
@@ -28,11 +37,14 @@ export type {
     EditorPolygonFeature,
     EditorLineStringFeature,
     EditorPointFeature,
+    EditorMarkerFeature,
     EditorProperties,
     BaseProperties,
     FillStyleProperties,
     StrokeStyleProperties,
     MarkerStyleProperties,
+    PointStyleProperties,
+    LabelProperties,
     Position,
     ToolMode,
     EditorProps,
