@@ -2,6 +2,11 @@
 
 Vue 3 component library for editing and viewing GeoJSON on a [MapLibre GL JS](https://maplibre.org/) map. Draw polygons, lines, and markers, style them with [simplestyle-spec](https://github.com/mapbox/simplestyle-spec) properties, and bind the result with `v-model`.
 
+> [!IMPORTANT]
+> The Tiny GeoJSON Tool is currently **v0.x** and subject to breaking changes prior to v1.0.0. Pin to a specific version or commit SHA if you need stability.
+
+You can find a demo of this editor at [code.richpods.org/tiny-geojson-tool/](https://code.richpods.org/tiny-geojson-tool/)
+
 ## Components
 
 **`GeoJsonEditor`** — Full editing UI with a drawing toolbar, property editor, and interactive map. Supports drawing polygons, lines, and point markers, selecting and deleting features, and editing style properties (fill, stroke, marker color/size/icon).
@@ -11,11 +16,10 @@ Vue 3 component library for editing and viewing GeoJSON on a [MapLibre GL JS](ht
 ## Install
 
 ```sh
-npm install @richpods/tiny-geojson-tool maplibre-gl
+npm install @richpods/tiny-geojson-tool maplibre-gl pmtiles
 ```
 
-Vue 3.5+ is a peer dependency.
-`maplibre-gl` is an optional peer dependency and is required when using `GeoJsonEditor` or `GeoJsonViewer`.
+Vue 3.5+, `maplibre-gl`, and `pmtiles` are peer dependencies.
 
 ## Usage
 
