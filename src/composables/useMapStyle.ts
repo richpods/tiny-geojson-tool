@@ -1,9 +1,6 @@
 import type { StyleSpecification } from "maplibre-gl";
-import { DEFAULT_PMTILES_URL } from "../constants";
 
-export function useMapStyle(pmtilesUrl?: string) {
-    const url = pmtilesUrl || DEFAULT_PMTILES_URL;
-
+export function useMapStyle(pmtilesUrl: string) {
     function getStyle(): StyleSpecification {
         return {
             version: 8,
@@ -11,7 +8,7 @@ export function useMapStyle(pmtilesUrl?: string) {
             sources: {
                 "versatiles-shortbread": {
                     type: "vector",
-                    url: `pmtiles://${url}`,
+                    url: `pmtiles://${pmtilesUrl}`,
                 },
             },
             layers: [

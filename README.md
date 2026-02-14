@@ -33,14 +33,14 @@ const geojson = ref<EditorFeatureCollection>({
 </script>
 
 <template>
-    <GeoJsonEditor v-model="geojson" />
+    <GeoJsonEditor v-model="geojson" pmtilesUrl="https://example.com/tiles.pmtiles" />
 </template>
 ```
 
 For read-only display:
 
 ```vue
-<GeoJsonViewer :modelValue="geojson" />
+<GeoJsonViewer :modelValue="geojson" pmtilesUrl="https://example.com/tiles.pmtiles" />
 ```
 
 ## Props
@@ -49,7 +49,7 @@ Both components accept:
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `pmtilesUrl` | `string` | Built-in Shortbread tiles | URL to a PMTiles archive for the base map |
+| `pmtilesUrl` | `string` | **(required)** | URL to a PMTiles archive for the base map |
 | `center` | `[lng, lat]` | `[0, 20]` | Initial map center |
 | `zoom` | `number` | `2` | Initial zoom level |
 
@@ -91,8 +91,14 @@ All user-facing strings in the editor can be overridden via the `l10n` prop. Pas
 
 ```vue
 <script setup lang="ts">
-import { GeoJsonEditor, DEFAULT_LOCALE } from "@richpods/tiny-geojson-tool";
-import type { EditorLocale } from "@richpods/tiny-geojson-tool";
+import { ref } from "vue";
+import { GeoJsonEditor } from "@richpods/tiny-geojson-tool";
+import type { EditorLocale, EditorFeatureCollection } from "@richpods/tiny-geojson-tool";
+
+const geojson = ref<EditorFeatureCollection>({
+    type: "FeatureCollection",
+    features: [],
+});
 
 const de: Partial<EditorLocale> = {
     toolSelect: "Auswählen",
@@ -106,7 +112,10 @@ const de: Partial<EditorLocale> = {
 </script>
 
 <template>
-    <GeoJsonEditor v-model="geojson" :l10n="de" />
+    <GeoJsonEditor
+        v-model="geojson"
+        :l10n="de"
+        pmtilesUrl="https://example.com/tiles.pmtiles" />
 </template>
 ```
 
@@ -118,7 +127,7 @@ All styles use CSS custom properties prefixed with `--tge-`. Override them to cu
 
 ## Base Map
 
-The default base map uses [Shortbread](https://shortbread-tiles.org/) vector tiles served from PMTiles. Pass a custom `pmtilesUrl` prop to use your own tile source.
+The base map expects vector tiles served from a PMTiles archive. We recommend the [Shortbread](https://shortbread-tiles.org/) schema for your tiles. You must provide the `pmtilesUrl` prop pointing to your own tile source.
 
 ## Development
 

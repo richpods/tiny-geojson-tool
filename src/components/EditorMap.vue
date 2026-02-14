@@ -30,7 +30,7 @@ import { useGeoJson } from "../composables/useGeoJson";
 const props = defineProps<{
     modelValue: EditorFeatureCollection;
     activeTool: ToolMode;
-    pmtilesUrl?: string;
+    pmtilesUrl: string;
     pointRadius?: number;
     center?: Position;
     zoom?: number;

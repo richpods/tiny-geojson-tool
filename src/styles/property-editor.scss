@@ -179,3 +179,13 @@
         font-size: 12px;
     }
 }
+
+/* Prevent iOS zoom on input focus (requires font-size >= 16px) */
+@container tge (max-width: 767px) {
+    .tge-property-editor__input,
+    .tge-property-editor__textarea,
+    .tge-property-editor__select,
+    .tge-icon-picker__search {
+        font-size: 16px;
+    }
+}

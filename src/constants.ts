@@ -1,20 +1,8 @@
-import type { ToolMode, Position } from "./types";
-
-export const TOOL_MODES: readonly ToolMode[] = [
-    "select",
-    "draw-point",
-    "draw-marker",
-    "draw-line",
-    "draw-polygon",
-    "eraser",
-] as const;
+import type { Position } from "./types";
 
 export const DEFAULT_POINT_RADIUS = 10;
 export const DEFAULT_CENTER: Position = [0, 20];
 export const DEFAULT_ZOOM = 2;
-
-export const DEFAULT_PMTILES_URL =
-    "https://storage.googleapis.com/richpod-shortbread-tiles/shortbread-europe.pmtiles";
 
 /** Default style values (simplestyle-spec 1.1.0 defaults) */
 export const DEFAULTS = {

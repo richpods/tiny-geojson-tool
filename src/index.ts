@@ -28,7 +28,7 @@ export { DEFAULT_LOCALE } from "./l10n";
 export type { EditorLocale } from "./l10n";
 
 // Constants
-export { SOURCE_ID, LAYER_IDS, DEFAULTS, MARKER_SIZE_SCALE, DEFAULT_PMTILES_URL } from "./constants";
+export { SOURCE_ID, LAYER_IDS, DEFAULTS, MARKER_SIZE_SCALE } from "./constants";
 
 // Types
 export type {

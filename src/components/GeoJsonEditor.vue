@@ -9,7 +9,7 @@ import type {
 } from "../types";
 import type { EditorLocale } from "../l10n";
 import { DEFAULT_LOCALE } from "../l10n";
-import { DEFAULT_PMTILES_URL, DEFAULT_POINT_RADIUS } from "../constants";
+import { DEFAULT_POINT_RADIUS } from "../constants";
 import EditorMap from "./EditorMap.vue";
 import EditorToolbar from "./EditorToolbar.vue";
 import LayerPanel from "./LayerPanel.vue";
@@ -17,14 +17,13 @@ import { COMMON_ICONS, getIconUrl } from "../utils/icons";
 
 const props = withDefaults(
     defineProps<{
-        pmtilesUrl?: string;
+        pmtilesUrl: string;
         pointRadius?: number;
         center?: Position;
         zoom?: number;
         l10n?: Partial<EditorLocale>;
     }>(),
     {
-        pmtilesUrl: DEFAULT_PMTILES_URL,
         pointRadius: DEFAULT_POINT_RADIUS,
         l10n: () => ({}),
     }
@@ -118,7 +117,12 @@ function onFeatureReorder(featureId: string, newIndex: number) {
             @featureClick="onFeatureClick"
             @featureDelete="onFeatureDelete"
             @toolDone="onToolDone" />
+        <div
+            v-if="selectedFeatureId"
+            class="tge-editor__backdrop"
+            @click="selectedFeatureId = null" />
         <LayerPanel
+            :class="{ 'tge-layer-panel--open': selectedFeatureId }"
             :features="model.features"
             :selectedFeatureId="selectedFeatureId"
             :l10n="locale"
@@ -126,6 +130,7 @@ function onFeatureReorder(featureId: string, newIndex: number) {
             @update="onPropertyUpdate"
             @select="onFeatureSelect"
             @delete="onFeatureDelete"
-            @reorder="onFeatureReorder" />
+            @reorder="onFeatureReorder"
+            @close="selectedFeatureId = null" />
     </div>
 </template>

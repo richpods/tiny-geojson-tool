@@ -8,7 +8,7 @@ import maplibregl, {
 import { Protocol } from "pmtiles";
 import { useMapStyle } from "../composables/useMapStyle";
 import type { EditorFeatureCollection, EditorFeature, Position } from "../types";
-import { SOURCE_ID, DEFAULT_CENTER, DEFAULT_ZOOM, DEFAULT_PMTILES_URL } from "../constants";
+import { SOURCE_ID, DEFAULT_CENTER, DEFAULT_ZOOM } from "../constants";
 import {
     getFeatureLayers,
     getQueryableLayerIds,
@@ -21,13 +21,12 @@ import { fitMapToFeatures, shouldAutoFitOnLoad } from "../utils/mapView";
 const props = withDefaults(
     defineProps<{
         modelValue?: EditorFeatureCollection;
-        pmtilesUrl?: string;
+        pmtilesUrl: string;
         center?: Position;
         zoom?: number;
     }>(),
     {
         modelValue: () => ({ type: "FeatureCollection" as const, features: [] }),
-        pmtilesUrl: DEFAULT_PMTILES_URL,
     }
 );
 

@@ -9,6 +9,23 @@
     width: 100%;
     height: 100%;
     font-family: var(--tge-font-family);
+    overflow: hidden;
+    container-type: inline-size;
+    container-name: tge;
+}
+
+.tge-editor__backdrop {
+    display: none;
+}
+
+@container tge (max-width: 767px) {
+    .tge-editor__backdrop {
+        display: block;
+        position: absolute;
+        inset: 0;
+        z-index: 4;
+        background: rgba(0, 0, 0, 0.3);
+    }
 }
 
 .tge-map {

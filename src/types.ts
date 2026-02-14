@@ -116,7 +116,7 @@ export type ToolMode = "select" | "draw-point" | "draw-polygon" | "draw-line" | 
 /** Editor props */
 export interface EditorProps {
     modelValue?: EditorFeatureCollection;
-    pmtilesUrl?: string;
+    pmtilesUrl: string;
     pointRadius?: number;
     center?: Position;
     zoom?: number;
@@ -128,7 +128,7 @@ export type { EditorLocale } from "./l10n";
 /** Viewer props (read-only map display) */
 export interface ViewerProps {
     modelValue?: EditorFeatureCollection;
-    pmtilesUrl?: string;
+    pmtilesUrl: string;
     center?: Position;
     zoom?: number;
 }

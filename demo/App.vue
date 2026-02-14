@@ -3,6 +3,8 @@ import { ref } from "vue";
 import { GeoJsonEditor, GeoJsonViewer } from "../src";
 import type { EditorFeatureCollection, Position } from "../src";
 
+const PMTILES_URL =
+    "https://storage.googleapis.com/richpod-shortbread-tiles/shortbread-europe.pmtiles";
 const center: Position = [16.39333, 48.22797];
 const geojson = ref<EditorFeatureCollection>({
     type: "FeatureCollection",
@@ -38,8 +40,18 @@ function downloadJson() {
 
 <template>
     <div class="demo">
-        <GeoJsonEditor v-if="mode === 'editor'" v-model="geojson" :center="center" :zoom="15" />
-        <GeoJsonViewer v-else :modelValue="geojson" :center="center" :zoom="15" />
+        <GeoJsonEditor
+            v-if="mode === 'editor'"
+            v-model="geojson"
+            :pmtilesUrl="PMTILES_URL"
+            :center="center"
+            :zoom="15" />
+        <GeoJsonViewer
+            v-else
+            :modelValue="geojson"
+            :pmtilesUrl="PMTILES_URL"
+            :center="center"
+            :zoom="15" />
         <div class="demo-controls">
             <button
                 class="demo-toggle"
