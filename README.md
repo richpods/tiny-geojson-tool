@@ -56,6 +56,7 @@ Both components accept:
 | `pmtilesUrl` | `string` | **(required)** | URL to a PMTiles archive for the base map |
 | `center` | `[lng, lat]` | `[0, 20]` | Initial map center |
 | `zoom` | `number` | `2` | Initial zoom level |
+| `bboxPadding` | `[top, right, bottom, left]` | `[0, 0, 0, 0]` | Extra padding used when fitting to GeoJSON bounds |
 
 `GeoJsonEditor` additionally accepts:
 
@@ -64,6 +65,12 @@ Both components accept:
 | `modelValue` | `EditorFeatureCollection` | Empty collection | GeoJSON feature collection (v-model) |
 | `pointRadius` | `number` | `10` | Radius of point features in pixels |
 | `l10n` | `Partial<EditorLocale>` | English | Override UI strings for localization |
+
+Initial map view priority on load:
+
+1. If `modelValue.bbox` is present, it is used directly.
+2. Otherwise, bounds are calculated from `modelValue.features`.
+3. If no bounds can be determined (empty map), `center` and `zoom` are used.
 
 ## Drawing Tools
 

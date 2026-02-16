@@ -1,6 +1,6 @@
 {
     "name": "@richpods/tiny-geojson-tool",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "RichPods' GeoJSON editor and viewer for MapLibre GL JS with drawing tools (points, lines, polygons), simplestyle-spec property editing, hover popups, PMTiles basemap support, and typed v-model bindings for custom mapping workflows.",
     "keywords": [
         "vue",
@@ -44,12 +44,13 @@
     ],
     "scripts": {
         "dev": "vite",
-        "build": "vite build && npm run build:types",
+        "clean:dist": "rm -rf dist",
+        "build": "npm run clean:dist && vite build && npm run build:types",
         "build:demo": "vite build --config vite.demo.config.ts",
         "build:types": "vue-tsc -p tsconfig.build.json",
         "preview:demo": "vite preview --config vite.demo.config.ts",
         "typecheck": "vue-tsc --noEmit",
-        "prepublishOnly": "npm run typecheck && npm run build"
+        "prepack": "npm run typecheck && npm run build"
     },
     "peerDependencies": {
         "maplibre-gl": "^5.18.0",

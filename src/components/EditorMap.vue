@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted, watch, type Ref } from "vue";
+import { ref, onMounted, onUnmounted, watch, type Ref } from "vue";
 import maplibregl, {
     type Map as MaplibreMap,
+    type MapOptions,
     type MapMouseEvent,
     Popup,
 } from "maplibre-gl";
@@ -12,6 +13,7 @@ import type {
     EditorFeature,
     Position,
     ToolMode,
+    BboxPadding,
 } from "../types";
 import { SOURCE_ID, TEMP_SOURCE_ID, TEMP_LINE_SOURCE_ID, TEMP_VERTICES_SOURCE_ID, DEFAULT_CENTER, DEFAULT_ZOOM, DEFAULT_POINT_RADIUS } from "../constants";
 import {
@@ -23,7 +25,7 @@ import {
     type FeatureSummary,
 } from "../utils/layers";
 import { loadIconsForFeatures } from "../utils/icons";
-import { fitMapToFeatures, shouldAutoFitOnLoad } from "../utils/mapView";
+import { getBounds, getPadding } from "../utils/mapView";
 import { useDrawing } from "../composables/useDrawing";
 import { useGeoJson } from "../composables/useGeoJson";
 
@@ -34,6 +36,7 @@ const props = defineProps<{
     pointRadius?: number;
     center?: Position;
     zoom?: number;
+    bboxPadding?: BboxPadding;
 }>();
 
 const emit = defineEmits<{
@@ -53,8 +56,13 @@ let mapLoaded = false;
 let prevFeatureSummaries: FeatureSummary[] = [];
 /** Cached queryable layer IDs (excludes labels) for queryRenderedFeatures. */
 let queryableLayerIds: string[] = [];
-/** Auto-fit only when consumer did not pass explicit map view props. */
-const shouldAutoFit = computed(() => shouldAutoFitOnLoad(props.center, props.zoom));
+
+const MOBILE_BREAKPOINT = 767;
+const LAYER_PANEL_RATIO = 0.2;
+const LAYER_PANEL_FALLBACK_MIN_WIDTH = 240;
+const LAYER_PANEL_FALLBACK_MAX_WIDTH = 320;
+const LAYER_PANEL_PADDING_GAP = 16;
+const TOOLBAR_PADDING_GAP = 16;
 
 const modelRef = ref(props.modelValue) as Ref<EditorFeatureCollection>;
 watch(
@@ -309,6 +317,51 @@ function escapeHtml(str: string): string {
     return div.innerHTML;
 }
 
+function getInitialFitPadding() {
+    const container = mapContainer.value;
+    if (!container) return getPadding(props.bboxPadding);
+    return getPadding(props.bboxPadding, {
+        left: getToolbarLeftPadding(container),
+        right: getLayerPanelRightPadding(container),
+    });
+}
+
+function getToolbarLeftPadding(container: HTMLElement): number {
+    const editorRoot = container.closest(".tge-editor");
+    if (!editorRoot) return 0;
+
+    const toolbar = editorRoot.querySelector<HTMLElement>(".tge-toolbar");
+    if (!toolbar) return 0;
+
+    const toolbarRect = toolbar.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+    const overlap = toolbarRect.right - containerRect.left;
+    if (overlap <= 0) return 0;
+
+    return Math.round(overlap + TOOLBAR_PADDING_GAP);
+}
+
+function getLayerPanelRightPadding(container: HTMLElement): number {
+    if (container.clientWidth <= MOBILE_BREAKPOINT) return 0;
+
+    const styles = getComputedStyle(container);
+    const minWidth = readCssPx(styles, "--tge-sidebar-min-width", LAYER_PANEL_FALLBACK_MIN_WIDTH);
+    const maxWidth = readCssPx(styles, "--tge-sidebar-max-width", LAYER_PANEL_FALLBACK_MAX_WIDTH);
+    const lower = Math.min(minWidth, maxWidth);
+    const upper = Math.max(minWidth, maxWidth);
+    const panelWidth = clamp(container.clientWidth * LAYER_PANEL_RATIO, lower, upper);
+    return Math.round(panelWidth + LAYER_PANEL_PADDING_GAP);
+}
+
+function readCssPx(styles: CSSStyleDeclaration, name: string, fallback: number): number {
+    const value = Number.parseFloat(styles.getPropertyValue(name));
+    return Number.isFinite(value) ? value : fallback;
+}
+
+function clamp(value: number, min: number, max: number): number {
+    return Math.min(Math.max(value, min), max);
+}
+
 onMounted(() => {
     if (!mapContainer.value) return;
 
@@ -320,14 +373,24 @@ onMounted(() => {
     }
 
     const { getStyle } = useMapStyle(props.pmtilesUrl);
-
-    map = new maplibregl.Map({
+    const mapOptions: MapOptions = {
         container: mapContainer.value,
         style: getStyle(),
-        center: props.center ?? DEFAULT_CENTER,
-        zoom: props.zoom ?? DEFAULT_ZOOM,
         attributionControl: false,
-    });
+    };
+    const initialBounds = getBounds(props.modelValue);
+    if (initialBounds) {
+        mapOptions.bounds = initialBounds;
+        mapOptions.fitBoundsOptions = {
+            padding: getInitialFitPadding(),
+            duration: 0,
+        };
+    } else {
+        mapOptions.center = props.center ?? DEFAULT_CENTER;
+        mapOptions.zoom = props.zoom ?? DEFAULT_ZOOM;
+    }
+
+    map = new maplibregl.Map(mapOptions);
 
     map.addControl(
         new maplibregl.AttributionControl({
@@ -393,14 +456,6 @@ onMounted(() => {
 
         // Load any icons from initial data
         await loadIconsForFeatures(map, props.modelValue.features as any);
-
-        if (shouldAutoFit.value) {
-            map.once("idle", () => {
-                if (map) {
-                    fitMapToFeatures(map, props.modelValue.features);
-                }
-            });
-        }
         mapLoaded = true;
         updateCursor();
     });

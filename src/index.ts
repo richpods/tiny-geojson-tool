@@ -46,6 +46,8 @@ export type {
     PointStyleProperties,
     LabelProperties,
     Position,
+    GeoJsonBbox,
+    BboxPadding,
     ToolMode,
     EditorProps,
     ViewerProps,

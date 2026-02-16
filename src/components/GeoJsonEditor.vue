@@ -6,10 +6,12 @@ import type {
     EditorProperties,
     ToolMode,
     Position,
+    BboxPadding,
 } from "../types";
 import type { EditorLocale } from "../l10n";
 import { DEFAULT_LOCALE } from "../l10n";
 import { DEFAULT_POINT_RADIUS } from "../constants";
+import { DEFAULT_BBOX_PADDING } from "../utils/mapView";
 import EditorMap from "./EditorMap.vue";
 import EditorToolbar from "./EditorToolbar.vue";
 import LayerPanel from "./LayerPanel.vue";
@@ -21,10 +23,12 @@ const props = withDefaults(
         pointRadius?: number;
         center?: Position;
         zoom?: number;
+        bboxPadding?: BboxPadding;
         l10n?: Partial<EditorLocale>;
     }>(),
     {
         pointRadius: DEFAULT_POINT_RADIUS,
+        bboxPadding: () => [...DEFAULT_BBOX_PADDING] as BboxPadding,
         l10n: () => ({}),
     }
 );
@@ -113,6 +117,7 @@ function onFeatureReorder(featureId: string, newIndex: number) {
             :pointRadius="props.pointRadius"
             :center="props.center"
             :zoom="props.zoom"
+            :bboxPadding="props.bboxPadding"
             @update:modelValue="model = $event"
             @featureClick="onFeatureClick"
             @featureDelete="onFeatureDelete"

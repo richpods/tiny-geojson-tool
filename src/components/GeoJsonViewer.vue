@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted, watch } from "vue";
+import { ref, onMounted, onUnmounted, watch } from "vue";
 import maplibregl, {
     type Map as MaplibreMap,
+    type MapOptions,
     type MapMouseEvent,
     Popup,
 } from "maplibre-gl";
 import { Protocol } from "pmtiles";
 import { useMapStyle } from "../composables/useMapStyle";
-import type { EditorFeatureCollection, EditorFeature, Position } from "../types";
+import type { EditorFeatureCollection, EditorFeature, Position, BboxPadding } from "../types";
 import { SOURCE_ID, DEFAULT_CENTER, DEFAULT_ZOOM } from "../constants";
 import {
     getFeatureLayers,
@@ -16,7 +17,7 @@ import {
     type FeatureSummary,
 } from "../utils/layers";
 import { loadIconsForFeatures } from "../utils/icons";
-import { fitMapToFeatures, shouldAutoFitOnLoad } from "../utils/mapView";
+import { DEFAULT_BBOX_PADDING, getBounds, getPadding } from "../utils/mapView";
 
 const props = withDefaults(
     defineProps<{
@@ -24,9 +25,11 @@ const props = withDefaults(
         pmtilesUrl: string;
         center?: Position;
         zoom?: number;
+        bboxPadding?: BboxPadding;
     }>(),
     {
         modelValue: () => ({ type: "FeatureCollection" as const, features: [] }),
+        bboxPadding: () => [...DEFAULT_BBOX_PADDING] as BboxPadding,
     }
 );
 
@@ -40,8 +43,6 @@ let mapLoaded = false;
 let prevFeatureSummaries: FeatureSummary[] = [];
 /** Cached queryable layer IDs (excludes labels) for queryRenderedFeatures. */
 let queryableLayerIds: string[] = [];
-/** Auto-fit only when consumer did not pass explicit map view props. */
-const shouldAutoFit = computed(() => shouldAutoFitOnLoad(props.center, props.zoom));
 
 function toSummaries(features: EditorFeature[]): FeatureSummary[] {
     return features.map((f) => ({ id: f.id, geomType: f.geometry.type }));
@@ -120,13 +121,24 @@ onMounted(() => {
 
     const { getStyle } = useMapStyle(props.pmtilesUrl);
 
-    map = new maplibregl.Map({
+    const mapOptions: MapOptions = {
         container: mapContainer.value,
         style: getStyle(),
-        center: props.center ?? DEFAULT_CENTER,
-        zoom: props.zoom ?? DEFAULT_ZOOM,
         attributionControl: false,
-    });
+    };
+    const initialBounds = getBounds(props.modelValue);
+    if (initialBounds) {
+        mapOptions.bounds = initialBounds;
+        mapOptions.fitBoundsOptions = {
+            padding: getPadding(props.bboxPadding),
+            duration: 0,
+        };
+    } else {
+        mapOptions.center = props.center ?? DEFAULT_CENTER;
+        mapOptions.zoom = props.zoom ?? DEFAULT_ZOOM;
+    }
+
+    map = new maplibregl.Map(mapOptions);
 
     map.addControl(
         new maplibregl.AttributionControl({
@@ -167,14 +179,6 @@ onMounted(() => {
         queryableLayerIds = getQueryableLayerIds(prevFeatureSummaries);
 
         await loadIconsForFeatures(map, props.modelValue.features as any);
-
-        if (shouldAutoFit.value) {
-            map.once("idle", () => {
-                if (map) {
-                    fitMapToFeatures(map, props.modelValue.features);
-                }
-            });
-        }
         mapLoaded = true;
     });
 

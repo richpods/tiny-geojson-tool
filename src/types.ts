@@ -3,6 +3,8 @@ import type { EditorLocale } from "./l10n";
 /** GeoJSON RFC 7946 aligned types for the editor */
 
 export type Position = [number, number]; // [lng, lat]
+export type GeoJsonBbox = [number, number, number, number] | [number, number, number, number, number, number];
+export type BboxPadding = [number, number, number, number]; // [top, right, bottom, left]
 export type PolygonCoordinates = Position[][];
 export type LineStringCoordinates = Position[];
 export type PointCoordinates = Position;
@@ -107,6 +109,7 @@ export type EditorProperties = BaseProperties &
 
 export interface EditorFeatureCollection {
     type: "FeatureCollection";
+    bbox?: GeoJsonBbox;
     features: EditorFeature[];
 }
 
@@ -120,6 +123,7 @@ export interface EditorProps {
     pointRadius?: number;
     center?: Position;
     zoom?: number;
+    bboxPadding?: BboxPadding;
     l10n?: Partial<EditorLocale>;
 }
 
@@ -131,4 +135,5 @@ export interface ViewerProps {
     pmtilesUrl: string;
     center?: Position;
     zoom?: number;
+    bboxPadding?: BboxPadding;
 }
