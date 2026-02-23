@@ -473,11 +473,24 @@ onUnmounted(() => {
     map = null;
 });
 
+function fitBounds(): void {
+    if (!map) return;
+    const bounds = getBounds(props.modelValue);
+    if (bounds) {
+        map.fitBounds(bounds, { padding: getInitialFitPadding() });
+    } else {
+        map.jumpTo({
+            center: props.center ?? DEFAULT_CENTER,
+            zoom: props.zoom ?? DEFAULT_ZOOM,
+        });
+    }
+}
+
 function getMap(): MaplibreMap | null {
     return map;
 }
 
-defineExpose({ getMap });
+defineExpose({ getMap, fitBounds });
 </script>
 
 <template>

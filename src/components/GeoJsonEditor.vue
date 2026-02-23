@@ -40,7 +40,10 @@ const model = defineModel<EditorFeatureCollection>({
     default: () => ({ type: "FeatureCollection", features: [] }),
 });
 
-const editorMapRef = ref<ComponentPublicInstance<{ getMap: () => MaplibreMap | null }> | null>(null);
+const editorMapRef = ref<ComponentPublicInstance<{
+    getMap: () => MaplibreMap | null;
+    fitBounds: () => void;
+}> | null>(null);
 const activeTool = ref<ToolMode>("select");
 const selectedFeatureId = ref<string | null>(null);
 const iconUrls = ref<Map<string, string>>(new Map());
@@ -95,11 +98,15 @@ function onFeatureSelect(id: string) {
     selectedFeatureId.value = id;
 }
 
+function fitBounds(): void {
+    editorMapRef.value?.fitBounds();
+}
+
 function getMap(): MaplibreMap | null {
     return editorMapRef.value?.getMap() ?? null;
 }
 
-defineExpose({ getMap });
+defineExpose({ getMap, fitBounds });
 
 function onFeatureReorder(featureId: string, newIndex: number) {
     const features = [...model.value.features];

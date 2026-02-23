@@ -30,6 +30,13 @@ GeoJsonViewer (modelValue prop, read-only)
 
 State mutations are immutable — always spread into new objects to trigger Vue reactivity and MapLibre source updates.
 
+### Exposed Methods
+
+Both `GeoJsonEditor` and `GeoJsonViewer` expose the following methods via template refs:
+
+- `getMap(): MaplibreMap | null` — Returns the underlying MapLibre map instance.
+- `fitBounds(): void` — Fits the map view to the current model's feature bounds, respecting `bboxPadding`. In the editor, also accounts for toolbar/layer panel overlap.
+
 ### MapLibre Integration
 
 - **PMTiles protocol** registered once in `EditorMap.vue` onMounted
