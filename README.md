@@ -72,6 +72,52 @@ Initial map view priority on load:
 2. Otherwise, bounds are calculated from `modelValue.features`.
 3. If no bounds can be determined (empty map), `center` and `zoom` are used.
 
+## Accessing the MapLibre Instance
+
+Both components expose a `getMap()` method via template ref that returns the underlying MapLibre GL JS `Map` instance (or `null` before the map is initialized). This lets you call MapLibre methods directly — add controls, fly to coordinates, query features, etc.
+
+```vue
+<script setup lang="ts">
+import { ref } from "vue";
+import { GeoJsonEditor } from "@richpods/tiny-geojson-tool";
+import "@richpods/tiny-geojson-tool/styles";
+import type { EditorFeatureCollection } from "@richpods/tiny-geojson-tool";
+
+const editorRef = ref<InstanceType<typeof GeoJsonEditor> | null>(null);
+const geojson = ref<EditorFeatureCollection>({
+    type: "FeatureCollection",
+    features: [],
+});
+
+function flyToVienna() {
+    editorRef.value?.getMap()?.flyTo({ center: [16.37, 48.21], zoom: 12 });
+}
+</script>
+
+<template>
+    <button @click="flyToVienna">Fly to Vienna</button>
+    <GeoJsonEditor
+        ref="editorRef"
+        v-model="geojson"
+        pmtilesUrl="https://example.com/tiles.pmtiles" />
+</template>
+```
+
+The same works for `GeoJsonViewer`:
+
+```vue
+<script setup lang="ts">
+import { ref } from "vue";
+import { GeoJsonViewer } from "@richpods/tiny-geojson-tool";
+
+const viewerRef = ref<InstanceType<typeof GeoJsonViewer> | null>(null);
+</script>
+
+<template>
+    <GeoJsonViewer ref="viewerRef" :modelValue="geojson" pmtilesUrl="https://example.com/tiles.pmtiles" />
+</template>
+```
+
 ## Drawing Tools
 
 The editor toolbar provides six modes:

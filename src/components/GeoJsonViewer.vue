@@ -190,6 +190,12 @@ onUnmounted(() => {
     map?.remove();
     map = null;
 });
+
+function getMap(): MaplibreMap | null {
+    return map;
+}
+
+defineExpose({ getMap });
 </script>
 
 <template>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, type ComponentPublicInstance } from "vue";
+import type { Map as MaplibreMap } from "maplibre-gl";
 import type {
     EditorFeatureCollection,
     EditorFeature,
@@ -39,6 +40,7 @@ const model = defineModel<EditorFeatureCollection>({
     default: () => ({ type: "FeatureCollection", features: [] }),
 });
 
+const editorMapRef = ref<ComponentPublicInstance<{ getMap: () => MaplibreMap | null }> | null>(null);
 const activeTool = ref<ToolMode>("select");
 const selectedFeatureId = ref<string | null>(null);
 const iconUrls = ref<Map<string, string>>(new Map());
@@ -93,6 +95,12 @@ function onFeatureSelect(id: string) {
     selectedFeatureId.value = id;
 }
 
+function getMap(): MaplibreMap | null {
+    return editorMapRef.value?.getMap() ?? null;
+}
+
+defineExpose({ getMap });
+
 function onFeatureReorder(featureId: string, newIndex: number) {
     const features = [...model.value.features];
     const oldIndex = features.findIndex((f) => f.id === featureId);
@@ -111,6 +119,7 @@ function onFeatureReorder(featureId: string, newIndex: number) {
     <div class="tge-editor">
         <EditorToolbar :activeTool="activeTool" :l10n="locale" @update:activeTool="onToolChange" />
         <EditorMap
+            ref="editorMapRef"
             :modelValue="model"
             :activeTool="activeTool"
             :pmtilesUrl="props.pmtilesUrl"
