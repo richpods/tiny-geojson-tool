@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { GeoJsonEditor, GeoJsonViewer } from "../src";
+import { GeoJsonEditor, GeoJsonViewer, NOMINATIM_PUBLIC_URL } from "../src";
 import type { EditorFeatureCollection, Position } from "../src";
 
 const PMTILES_URL =
@@ -45,7 +45,8 @@ function downloadJson() {
             v-model="geojson"
             :pmtilesUrl="PMTILES_URL"
             :center="center"
-            :zoom="15" />
+            :zoom="15"
+            :nominatimUrl="NOMINATIM_PUBLIC_URL" />
         <GeoJsonViewer
             v-else
             :modelValue="geojson"

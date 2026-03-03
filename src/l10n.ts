@@ -38,6 +38,10 @@ export interface EditorLocale {
     layerMarker: string;
     layerLine: string;
     layerPolygon: string;
+    locationSearchPlaceholder: string;
+    locationSearchAction: string;
+    locationSearchNoResults: string;
+    locationSearchError: string;
 }
 
 export const DEFAULT_LOCALE: EditorLocale = {
@@ -79,4 +83,8 @@ export const DEFAULT_LOCALE: EditorLocale = {
     layerMarker: "Marker",
     layerLine: "Line",
     layerPolygon: "Polygon",
+    locationSearchPlaceholder: "Search location...",
+    locationSearchAction: "Search",
+    locationSearchNoResults: "No results found",
+    locationSearchError: "Search failed",
 };

@@ -125,6 +125,10 @@ export interface EditorProps {
     zoom?: number;
     bboxPadding?: BboxPadding;
     l10n?: Partial<EditorLocale>;
+    nominatimUrl?: string;
+    searchDelay?: number;
+    searchBoosting?: boolean;
+    searchLanguage?: string;
 }
 
 export type { EditorLocale } from "./l10n";

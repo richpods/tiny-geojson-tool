@@ -13,6 +13,7 @@ import type { EditorLocale } from "../l10n";
 import { DEFAULT_LOCALE } from "../l10n";
 import { DEFAULT_POINT_RADIUS } from "../constants";
 import { DEFAULT_BBOX_PADDING } from "../utils/mapView";
+import type { Viewport } from "../composables/useNominatimSearch";
 import EditorMap from "./EditorMap.vue";
 import EditorToolbar from "./EditorToolbar.vue";
 import LayerPanel from "./LayerPanel.vue";
@@ -26,11 +27,16 @@ const props = withDefaults(
         zoom?: number;
         bboxPadding?: BboxPadding;
         l10n?: Partial<EditorLocale>;
+        nominatimUrl?: string;
+        searchDelay?: number;
+        searchBoosting?: boolean;
+        searchLanguage?: string;
     }>(),
     {
         pointRadius: DEFAULT_POINT_RADIUS,
         bboxPadding: () => [...DEFAULT_BBOX_PADDING] as BboxPadding,
         l10n: () => ({}),
+        searchBoosting: true,
     }
 );
 
@@ -98,6 +104,23 @@ function onFeatureSelect(id: string) {
     selectedFeatureId.value = id;
 }
 
+function getViewport(): Viewport | null {
+    const map = editorMapRef.value?.getMap();
+    if (!map) return null;
+    const b = map.getBounds();
+    return {
+        bounds: [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()],
+        zoom: map.getZoom(),
+    };
+}
+
+function onLocationSelect(bounds: [[number, number], [number, number]]) {
+    const map = editorMapRef.value?.getMap();
+    if (map) {
+        map.fitBounds(bounds, { padding: 50 });
+    }
+}
+
 function fitBounds(): void {
     editorMapRef.value?.fitBounds();
 }
@@ -148,10 +171,15 @@ function onFeatureReorder(featureId: string, newIndex: number) {
             :selectedFeatureId="selectedFeatureId"
             :l10n="locale"
             :iconUrls="iconUrls"
+            :nominatimUrl="props.nominatimUrl"
+            :searchDelay="props.searchDelay"
+            :getViewport="props.searchBoosting ? getViewport : undefined"
+            :searchLanguage="props.searchLanguage"
             @update="onPropertyUpdate"
             @select="onFeatureSelect"
             @delete="onFeatureDelete"
             @reorder="onFeatureReorder"
+            @locationSelect="onLocationSelect"
             @close="selectedFeatureId = null" />
     </div>
 </template>

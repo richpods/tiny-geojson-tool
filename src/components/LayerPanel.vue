@@ -2,13 +2,19 @@
 import { ref, computed, watch, nextTick } from "vue";
 import type { EditorFeature, EditorProperties } from "../types";
 import type { EditorLocale } from "../l10n";
+import type { Viewport } from "../composables/useNominatimSearch";
 import LayerItem from "./LayerItem.vue";
+import LocationSearch from "./LocationSearch.vue";
 
 const props = defineProps<{
     features: EditorFeature[];
     selectedFeatureId: string | null;
     l10n: EditorLocale;
     iconUrls: Map<string, string>;
+    nominatimUrl?: string;
+    searchDelay?: number;
+    getViewport?: () => Viewport | null;
+    searchLanguage?: string;
 }>();
 
 const emit = defineEmits<{
@@ -16,6 +22,7 @@ const emit = defineEmits<{
     (e: "select", id: string): void;
     (e: "delete", id: string): void;
     (e: "reorder", featureId: string, newIndex: number): void;
+    (e: "locationSelect", bounds: [[number, number], [number, number]]): void;
     (e: "close"): void;
 }>();
 
@@ -156,6 +163,14 @@ function collapseAll() {
 
 <template>
     <div class="tge-layer-panel">
+        <LocationSearch
+            v-if="props.nominatimUrl"
+            :nominatimUrl="props.nominatimUrl"
+            :l10n="l10n"
+            :searchDelay="props.searchDelay"
+            :getViewport="props.getViewport"
+            :searchLanguage="props.searchLanguage"
+            @select="emit('locationSelect', $event)" />
         <div class="tge-layer-panel__header">
             <button class="tge-layer-panel__title" type="button" @click="collapseAll">
                 {{ l10n.layerPanelTitle }}
