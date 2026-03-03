@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import { watch, onUnmounted } from "vue";
 import {
-    useNominatimSearch,
-    type NominatimResult,
+    usePhotonSearch,
+    type PhotonResult,
     type Viewport,
-} from "../composables/useNominatimSearch";
+} from "../composables/usePhotonSearch";
 import type { EditorLocale } from "../l10n";
+
+const POINT_BBOX_OFFSET = 0.01;
 
 const props = withDefaults(
     defineProps<{
-        nominatimUrl: string;
+        photonUrl: string;
         l10n: EditorLocale;
         searchDelay?: number;
         getViewport?: () => Viewport | null;
@@ -22,8 +24,8 @@ const emit = defineEmits<{
     (e: "select", bounds: [[number, number], [number, number]]): void;
 }>();
 
-const { query, results, loading, error, searched, search, clear } = useNominatimSearch(
-    props.nominatimUrl,
+const { query, results, loading, error, searched, search, clear } = usePhotonSearch(
+    props.photonUrl,
     props.getViewport,
     props.searchLanguage
 );
@@ -45,17 +47,19 @@ function onSubmit() {
     search();
 }
 
-function onSelect(result: NominatimResult) {
-    const [south, north, west, east] = result.boundingbox.map(Number) as [
-        number,
-        number,
-        number,
-        number,
-    ];
-    emit("select", [
-        [west, south],
-        [east, north],
-    ]);
+function onSelect(result: PhotonResult) {
+    if (result.extent) {
+        const [west, south, east, north] = result.extent;
+        emit("select", [
+            [west, south],
+            [east, north],
+        ]);
+    } else {
+        emit("select", [
+            [result.lon - POINT_BBOX_OFFSET, result.lat - POINT_BBOX_OFFSET],
+            [result.lon + POINT_BBOX_OFFSET, result.lat + POINT_BBOX_OFFSET],
+        ]);
+    }
     clear();
 }
 </script>

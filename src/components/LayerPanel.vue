@@ -2,7 +2,7 @@
 import { ref, computed, watch, nextTick } from "vue";
 import type { EditorFeature, EditorProperties } from "../types";
 import type { EditorLocale } from "../l10n";
-import type { Viewport } from "../composables/useNominatimSearch";
+import type { Viewport } from "../composables/usePhotonSearch";
 import LayerItem from "./LayerItem.vue";
 import LocationSearch from "./LocationSearch.vue";
 
@@ -11,7 +11,7 @@ const props = defineProps<{
     selectedFeatureId: string | null;
     l10n: EditorLocale;
     iconUrls: Map<string, string>;
-    nominatimUrl?: string;
+    photonUrl?: string;
     searchDelay?: number;
     getViewport?: () => Viewport | null;
     searchLanguage?: string;
@@ -164,8 +164,8 @@ function collapseAll() {
 <template>
     <div class="tge-layer-panel">
         <LocationSearch
-            v-if="props.nominatimUrl"
-            :nominatimUrl="props.nominatimUrl"
+            v-if="props.photonUrl"
+            :photonUrl="props.photonUrl"
             :l10n="l10n"
             :searchDelay="props.searchDelay"
             :getViewport="props.getViewport"

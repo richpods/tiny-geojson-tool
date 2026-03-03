@@ -33,7 +33,7 @@ export const LAYER_IDS = {
     vertices: "editor-vertices",
 } as const;
 
-export const NOMINATIM_PUBLIC_URL = "https://nominatim.openstreetmap.org";
+export const PHOTON_PUBLIC_URL = "https://photon.komoot.io";
 
 export const SOURCE_ID = "editor-geojson";
 export const TEMP_SOURCE_ID = "drawing-temp";

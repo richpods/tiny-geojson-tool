@@ -125,7 +125,7 @@ export interface EditorProps {
     zoom?: number;
     bboxPadding?: BboxPadding;
     l10n?: Partial<EditorLocale>;
-    nominatimUrl?: string;
+    photonUrl?: string;
     searchDelay?: number;
     searchBoosting?: boolean;
     searchLanguage?: string;

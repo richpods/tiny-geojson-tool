@@ -13,7 +13,7 @@ import type { EditorLocale } from "../l10n";
 import { DEFAULT_LOCALE } from "../l10n";
 import { DEFAULT_POINT_RADIUS } from "../constants";
 import { DEFAULT_BBOX_PADDING } from "../utils/mapView";
-import type { Viewport } from "../composables/useNominatimSearch";
+import type { Viewport } from "../composables/usePhotonSearch";
 import EditorMap from "./EditorMap.vue";
 import EditorToolbar from "./EditorToolbar.vue";
 import LayerPanel from "./LayerPanel.vue";
@@ -27,7 +27,7 @@ const props = withDefaults(
         zoom?: number;
         bboxPadding?: BboxPadding;
         l10n?: Partial<EditorLocale>;
-        nominatimUrl?: string;
+        photonUrl?: string;
         searchDelay?: number;
         searchBoosting?: boolean;
         searchLanguage?: string;
@@ -107,9 +107,9 @@ function onFeatureSelect(id: string) {
 function getViewport(): Viewport | null {
     const map = editorMapRef.value?.getMap();
     if (!map) return null;
-    const b = map.getBounds();
+    const c = map.getCenter();
     return {
-        bounds: [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()],
+        center: [c.lng, c.lat],
         zoom: map.getZoom(),
     };
 }
@@ -171,7 +171,7 @@ function onFeatureReorder(featureId: string, newIndex: number) {
             :selectedFeatureId="selectedFeatureId"
             :l10n="locale"
             :iconUrls="iconUrls"
-            :nominatimUrl="props.nominatimUrl"
+            :photonUrl="props.photonUrl"
             :searchDelay="props.searchDelay"
             :getViewport="props.searchBoosting ? getViewport : undefined"
             :searchLanguage="props.searchLanguage"
