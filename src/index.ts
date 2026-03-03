@@ -10,6 +10,8 @@ export { default as GeoJsonViewer } from "./components/GeoJsonViewer.vue";
 export { useGeoJson } from "./composables/useGeoJson";
 export { useDrawing } from "./composables/useDrawing";
 export { useMapStyle } from "./composables/useMapStyle";
+export { usePhotonSearch } from "./composables/usePhotonSearch";
+export type { PhotonResult, Viewport } from "./composables/usePhotonSearch";
 
 // Utilities for standalone map integration
 export {
@@ -28,7 +30,7 @@ export { DEFAULT_LOCALE } from "./l10n";
 export type { EditorLocale } from "./l10n";
 
 // Constants
-export { SOURCE_ID, LAYER_IDS, DEFAULTS, MARKER_SIZE_SCALE } from "./constants";
+export { SOURCE_ID, LAYER_IDS, DEFAULTS, MARKER_SIZE_SCALE, PHOTON_PUBLIC_URL } from "./constants";
 
 // Types
 export type {

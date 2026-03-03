@@ -65,6 +65,10 @@ Both components accept:
 | `modelValue` | `EditorFeatureCollection` | Empty collection | GeoJSON feature collection (v-model) |
 | `pointRadius` | `number` | `10` | Radius of point features in pixels |
 | `l10n` | `Partial<EditorLocale>` | English | Override UI strings for localization |
+| `photonUrl` | `string` | — | Base URL for a [Photon](https://photon.komoot.io/) geocoder instance. Enables the location search box in the layer panel |
+| `searchDelay` | `number` | — | Debounce delay in ms before firing a search request |
+| `searchBoosting` | `boolean` | `true` | Boost search results towards the current map viewport |
+| `searchLanguage` | `string` | — | Language code for search results (e.g. `"de"`, `"fr"`) — passed as `lang` to the Photon API |
 
 Initial map view priority on load:
 
@@ -130,6 +134,25 @@ The editor toolbar provides six modes:
 - **Eraser** — Click features to delete them
 
 Right-click or press Escape to cancel drawing.
+
+## Location Search
+
+`GeoJsonEditor` supports geocoded location search powered by [Photon](https://photon.komoot.io/), an open-source geocoder built on OpenStreetMap data. Pass a Photon instance URL via the `photonUrl` prop to enable a search box in the layer panel.
+
+```vue
+<script setup lang="ts">
+import { GeoJsonEditor, PHOTON_PUBLIC_URL } from "@richpods/tiny-geojson-tool";
+</script>
+
+<template>
+    <GeoJsonEditor
+        v-model="geojson"
+        pmtilesUrl="https://example.com/tiles.pmtiles"
+        :photonUrl="PHOTON_PUBLIC_URL" />
+</template>
+```
+
+The library exports `PHOTON_PUBLIC_URL` (`https://photon.komoot.io`) for convenience. For production use, consider hosting your own Photon instance. When `searchBoosting` is enabled (the default), search results are biased towards the current map viewport.
 
 ## Style Properties
 

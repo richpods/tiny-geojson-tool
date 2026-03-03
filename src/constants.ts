@@ -33,6 +33,8 @@ export const LAYER_IDS = {
     vertices: "editor-vertices",
 } as const;
 
+export const PHOTON_PUBLIC_URL = "https://photon.komoot.io";
+
 export const SOURCE_ID = "editor-geojson";
 export const TEMP_SOURCE_ID = "drawing-temp";
 export const TEMP_LINE_SOURCE_ID = "drawing-temp-line";
