@@ -34,7 +34,7 @@ let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
 watch(query, (q) => {
     if (debounceTimer) clearTimeout(debounceTimer);
-    if (!q.trim()) return;
+    if (q.trim().length < 4) return;
     debounceTimer = setTimeout(() => search(), props.searchDelay);
 });
 

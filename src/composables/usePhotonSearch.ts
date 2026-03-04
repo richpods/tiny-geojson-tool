@@ -2,6 +2,7 @@ import { ref } from "vue";
 
 const RESULT_LIMIT = 5;
 const MAX_CACHE_SIZE = 100;
+const MIN_QUERY_LENGTH = 4;
 
 export interface PhotonResult {
     display_name: string;
@@ -93,7 +94,7 @@ export function usePhotonSearch(
 
     async function search() {
         const q = query.value.trim().replace(/\s+/g, " ");
-        if (!q) return;
+        if (q.length < MIN_QUERY_LENGTH) return;
 
         error.value = false;
 
